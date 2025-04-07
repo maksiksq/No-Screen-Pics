@@ -5,9 +5,20 @@ import aiohttp
 import discord
 import aiofiles
 import dotenv
+import json
 import PIL
 
+def load_switches():
+    with open("switches.json") as f:
+        return json.load(f)
+
+def save_switches(data):
+    with open("switches.json", "w") as f:
+        json.dump(data, f)
+
 from tensorflow import keras
+
+guild_switches = {}
 
 dotenv.load_dotenv()
 
@@ -56,6 +67,17 @@ async def on_ready():
 async def hello(ctx: discord.ApplicationContext):
     await ctx.respond("Hey!")
 
+@bot.slash_command(name="verbose", description="Adds accuracy numbers to bot's responses")
+async def verbose(ctx):
+    guild_id = ctx.guild_id
+    current = guild_switches.get(guild_id, False)
+    guild_switches[guild_id] = not current
+
+    save_switches(guild_switches)
+
+    print(guild_switches[guild_id])
+    await ctx.respond(f"Verbose mode is now {guild_switches[guild_id]}. Run the command again to toggle.")
+
 
 @bot.event
 async def on_message(message):
@@ -73,15 +95,22 @@ async def on_message(message):
         img_bytes = await fetch_image(attachment.url)
         confidence = await classify_image_w_bytes(img_bytes)
 
+        guild_id = message.guild.id
+
+        verbosnt = guild_switches.get(guild_id)
+        print(f"Verbose: {verbosnt}")
+
         if confidence < 0.5:
-            await message.channel.send(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
-            await message.channel.send("❌ PLEASE, FOR GOD'S SAKE, JUST MAKE A SCREENSHOT.")
+            if verbosnt:
+                await message.reply(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
+            await message.reply("❌ PLEASE, FOR GOD'S SAKE, JUST MAKE A SCREENSHOT.")
             print(f"new message:\n {attachment.url}")
             print("❌ PLEASE, FOR GOD'S SAKE, JUST MAKE A SCREENSHOT.")
 
         else:
-            await message.channel.send(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
-            await message.channel.send("✅ This is a proper screenshot. Doing nothing.")
+            if verbosnt:
+                await message.reply(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
+            await message.reply("✅ This is a proper screenshot. Doing nothing.")
             print(f"new message:\n {attachment.url}")
             print("✅ This is a proper screenshot, doing nothing.")
 
