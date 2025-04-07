@@ -76,7 +76,7 @@ async def verbose(ctx):
     save_switches(guild_switches)
 
     print(guild_switches[guild_id])
-    await ctx.respond(f"Verbose mode is now {guild_switches[guild_id]}. Run the command again to toggle.")
+    await ctx.respond(f"Verbose mode is now set to {guild_switches[guild_id]}. Run the command again to toggle.")
 
 
 @bot.event
