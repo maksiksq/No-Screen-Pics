@@ -106,7 +106,7 @@ async def on_message(message):
             verbosnt = guild_switches.get(guild_id, False)
         print(f"Verbose: {verbosnt}")
 
-        if confidence < 0.5:
+        if confidence < 0.3:
             if verbosnt:
                 await message.reply(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
             await message.reply("**Viewing a photo of a screen is not very pleasant, particularly if there's text to read. Simply take a screenshot instead, it's faster and easier.**\nHow to take a screenshot:\n- within Minecraft: F2 \n- Windows: Win + Shift + S \n- Mac: Shift + Command + 4")
