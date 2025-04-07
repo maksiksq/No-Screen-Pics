@@ -69,6 +69,9 @@ async def hello(ctx: discord.ApplicationContext):
 
 @bot.slash_command(name="verbose", description="Adds accuracy numbers to bot's responses")
 async def verbose(ctx):
+    if not ctx.author.guild_permissions.administrator:
+        await ctx.respond("Nuh uh. You must be an admin to use this command. ", ephemeral=True)
+        return
     guild_id = ctx.guild_id
     current = guild_switches.get(guild_id, False)
     guild_switches[guild_id] = not current
@@ -90,7 +93,7 @@ async def on_message(message):
         return
 
     for attachment in message.attachments:
-        await message.channel.send('Scanning beep boop')
+        # await message.channel.send('Scanning beep boop')
 
         img_bytes = await fetch_image(attachment.url)
         confidence = await classify_image_w_bytes(img_bytes)
@@ -98,19 +101,28 @@ async def on_message(message):
         guild_id = message.guild.id
 
         verbosnt = guild_switches.get(guild_id)
+        if verbosnt is None:
+            guild_switches[guild_id] = False
+            verbosnt = guild_switches.get(guild_id, False)
         print(f"Verbose: {verbosnt}")
 
         if confidence < 0.5:
             if verbosnt:
                 await message.reply(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
-            await message.reply("❌ PLEASE, FOR GOD'S SAKE, JUST MAKE A SCREENSHOT.")
+            await message.reply("**Viewing a photo of a screen is not very pleasant, particularly if there's text to read. Simply take a screenshot instead, it's faster and easier.**\nHow to take a screenshot:\n- within Minecraft: F2 \n- Windows: Win + Shift + S \n- Mac: Shift + Command + 4")
+
+            # old response
+            # await message.reply("❌ PLEASE, FOR GOD'S SAKE, JUST MAKE A SCREENSHOT.")
+
             print(f"new message:\n {attachment.url}")
             print("❌ PLEASE, FOR GOD'S SAKE, JUST MAKE A SCREENSHOT.")
 
         else:
             if verbosnt:
                 await message.reply(f"Prediction (0 = bad photo, 1 = screenshot): {confidence}")
-            await message.reply("✅ This is a proper screenshot. Doing nothing.")
+                await message.reply("✅ This is a proper screenshot. Doing nothing.")
+
+            # Doing nothing
             print(f"new message:\n {attachment.url}")
             print("✅ This is a proper screenshot, doing nothing.")
 
