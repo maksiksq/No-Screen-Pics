@@ -1,5 +1,5 @@
 # No Screen Pics
-This bot warns a user when they send a crappy screen photo instead of a proper screenshot and tells them to Alt+Print Screen please.
+This Discord bot warns a user when they send a crappy screen photo instead of a proper screenshot and tells them to Alt+Print Screen please.
 
 If the bot is unsure it most likely won't react to prevent spamming the chat, pretty much fail safe from my testing but needs more of it. 
 
